@@ -34,7 +34,7 @@ var Almanac = require('path/to/almanac')
 
 ```js
 // get a HTML element
-var elem = document.getElementById( 'almanac' );
+var elem = document.getElementById( 'myAlmanac' );
 
 // or create one and insert when you want
 // var elem = document.createElement( 'div' );
