@@ -94,7 +94,7 @@ describe( 'Almanac', function () {
 
 		it( 'sets the name from html', function () {
 			var el = document.getElementById( 'almanac' );
-			var almanac = new Almanac( el );
+			var almanac = new Almanac( el, {showMonths: 4} );
 			expect( almanac.settings.name ).to.equal( 'example' );
 		});
 
@@ -242,6 +242,13 @@ describe( 'Almanac', function () {
 			expect( typeof almanac.dates ).to.equal( 'object' );
 		});
 
+		// custom data aka [data-almanac]
+		it( 'set custom data "data-almanac" to element', function () {
+			var el = bulkElem();
+			var almanac = new Almanac( el );
+			expect( almanac.el.getAttribute( 'data-almanac' ) ).to.exist;
+		});
+
 		// cursor
 		it( 'has `cursor` property 0 by default', function () {
 			var el = bulkElem();
@@ -330,8 +337,13 @@ describe( 'reveal', function () {
 	var almanac = new Almanac( el, {showMonths: 4} );
 	var today = new Date();
 	var monthCode = getMonthCode( today );
+
 	it( 'adds months to Almanac.dates if not exist', function () {
 		expect( almanac.dates[monthCode] ).to.exist;
+	});
+
+	it( 'print rendered months in calendar', function () {
+		expect( almanac.el.getElementsByTagName( 'div' ).length ).to.be.above( 0 );
 	});
 
 });
@@ -346,42 +358,56 @@ describe( 'Month', function () {
 		var today = new Date();
 		var firstMonth;
 		var monthCode = getMonthCode( today );
+
 		it( 'sets itself in Almanac.dates', function () {
-			firstMonth = almanac.dates[getMonthCode( today )]
+			firstMonth = almanac.dates[getMonthCode( today )];
 			expect( firstMonth ).to.exist;
 		});
+
 		it( 'has number `year` property in format YYYY', function () {
-			expect( firstMonth.year ).to.equal( monthCode.slice(0,4) );
+			expect( firstMonth.year ).to.equal( Number( monthCode.slice( 0,4 )));
 		});
+
 		it( 'has number `month` property', function () {
-			expect( firstMonth ).to.exist;
+			expect( firstMonth.month ).to.equal( Number( monthCode.slice( 4,6 )));
 		});
+
 		it( 'has `el` property containing HTML month element', function () {
 			expect( firstMonth.el ).to.exist;
 		});
+
 		it( 'has `days` array ', function () {
 			expect( firstMonth.days ).to.exist;
 			expect( isArray( almanac.dates[getMonthCode( today )].days )).to.equal( true );
 		});
+
 		it( 'has `revealed` property', function () {
 			expect( firstMonth.revealed ).to.exist;
 		});
+
 		it( '`el` has data-almaMonth property and it is correct', function () {
 			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.exist;
-			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.equal( monthCode.slice(4,6) );
+			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.equal( monthCode );
 		});
+
 		it( 'renders correct header in month element', function () {
 			expect( firstMonth.el.getElementsByTagName( 'header' )[0] ).to.exist;
-			var monthTitle = almanac.settings.monthNames[Number( monthCode.slice( 4,6 ))] + ' ' + monthCode.slice( 2,4 );
+			var monthTitle = almanac.settings.monthNames[Number( monthCode.slice( 4,6 )) - 1] + ' ' + monthCode.slice( 2,4 );
 			expect( firstMonth.header.innerHTML ).to.equal( monthTitle );
 		});
+
 		it( 'renders correct indent in month element' );
+
+		it( 'starts with the correct day of the week' );
+
+		it( 'print days in calendar', function () {
+			expect( firstMonth.el.getElementsByTagName( 'div' ).length ).to.be.above( 27 );
+		});
+
 		it( 'has the correct number of days', function () {
-			var daysInMonth = new Date( Number(monthCode.slice(2,4)), Number(monthCode.slice(4, 6)) + 1 , 0 ).getDate();
+			var daysInMonth = new Date( Number(monthCode.slice(2,4)), Number(monthCode.slice(4, 6) ) , 0 ).getDate();
 			expect( firstMonth.days.length ).to.equal( daysInMonth );
 		} );
-		it( 'starts with the correct day of the week' );
-		it( 'print days in calendar' );
 	});
 
 	describe( '#show', function () {
@@ -397,14 +423,56 @@ describe( 'Month', function () {
 
 describe( 'Day', function () {
 
+	var el = bulkElem();
+	var almanac = new Almanac( el );
+	var today = new Date();
+	var nToday = today.getDate();
+	var monthCode = getMonthCode( today );
+	var firstMonth = almanac.dates[getMonthCode( today )];
+	var todayCode = Number( today.getFullYear() + '' + zero( today.getMonth() + 1 ) + '' + zero( today.getDate()));
+
 	describe( 'constructor', function () {
 
-		it( 'has number `year` property' );
-		it( 'has number `month` property' );
-		it( 'has boolean `checked` property' );
-		it( 'insert itself in month.days');
-		it( 'has `el` property containing HTML day element (label+input)' );
-		it( '`el` has data-almanacDay property and it is correct' );
+		it( 'has date `date` property', function () {
+			expect( firstMonth.days[nToday].date.toDateString() ).to.equal( today.toDateString() );
+		});
+
+		it( 'has number `year` property', function () {
+			expect( firstMonth.days[nToday].year ).to.equal( Number( monthCode.slice( 0, 4 )));
+		});
+
+		it( 'has number `month` property', function () {
+			expect( firstMonth.days[nToday].month ).to.equal( Number( monthCode.slice( 4, 6 )));
+		});
+
+		it( 'has boolean `checked` property', function () {
+			expect( typeof firstMonth.days[nToday].checked ).to.equal( 'boolean' );
+		});
+
+		it( 'has boolean `blocked` property', function () {
+			expect( typeof firstMonth.days[nToday].blocked ).to.equal( 'boolean' );
+		});
+
+		it( 'print its element in month.el', function () {
+			expect( firstMonth.days[0].el ).to.exist;
+		});
+
+		it( 'has `el` property containing input element', function () {
+			expect( firstMonth.days[0].el.getElementsByTagName( 'input' ).length ).to.be.above( 0 );
+		});
+
+		it( 'has `el` property containing label element', function () {
+			expect( firstMonth.days[0].el.getElementsByTagName( 'label' ).length ).to.be.above( 0 );
+		});
+
+		it( 'has number `code` property equal its dat (YYYYMMDD)', function () {
+
+			expect( firstMonth.days[nToday].code ).to.equal( todayCode );
+		});
+		it( '`el` has data-almaday property and it equal its code', function () {
+			expect( firstMonth.days[nToday].el.getAttribute( 'data-almaday' )).to.equal( todayCode.toString() );
+		});
+
 		it( 'prints itself in calendar' );
 	});
 

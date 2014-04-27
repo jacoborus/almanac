@@ -1,7 +1,9 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, Month, zero, show, getMonthCode, reveal,nDays;
+var isNode, isElement, isDOM, startsWithNumber, checkClasses,
+	setClasses, isArray, validMonthNames, addCSS, Header, Month,
+	zero, show, getMonthCode, reveal, nDays, Day, _opts;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -75,7 +77,7 @@ validMonthNames = function () {
 // inject css in html header
 addCSS = function () {
 	var s = document.getElementById('almanac-style'),
-		createStyle = 'almanac *{text-align:center;box-sizing:border-box;transition:all .3s}';
+		createStyle = '[data-almanac]{padding:.5%}[data-almanac] *{text-align:center;box-sizing:border-box;transition:all .3s}[data-almanac] header{width:98%}[data-almanac] a.floatleft{float:left;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac] a.floatright{float:right;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac],[data-almanac] [data-almamonth],[data-almanac] header,[data-almanac] label{float:left;border:1px solid #aaa;border-radius:.3em;background-color:#fff;color:#333;line-height:2.5em}[data-almanac] [data-almaday],[data-almanac] [data-almamonth] header{height:12.28%;margin:1%}[data-almanac] [data-almamonth]{width:21em;height:21em;padding:.5em;margin:.5em;overflow:hidden}[data-almanac] [data-almamonth].hide{width:0;margin:0;padding:0;border:0;height:0}[data-almanac] [data-almamonth] header{height:12.28%}[data-almanac] [data-almaday]{float:left;width:12.28%}[data-almanac] [data-almaday] input{display:none}[data-almanac] [data-almaday] label{width:100%;height:100%;cursor:pointer}[data-almanac] [data-almaday]:hover label{background:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:checked+label,[data-almanac] [data-almaday] input[type=radio]:checked+label{background-color:#333;color:#fff}';
 
 	if (s === null) {
 		s = document.createElement( 'style' );
@@ -144,8 +146,11 @@ reveal = function () {
 		if (!d[ r[i] ]) {
 			// add month to dates
 			d[ r[i] ] = new Month( this, r[i] );
+			// print month
+			this.el.appendChild( d[r[i]].el );
 		}
 	}
+
 	// hide and show rendered months
 	for (i in d) {
 		// check if month is shown
@@ -160,35 +165,61 @@ reveal = function () {
 
 // get number of days in month
 nDays = function (year, month) {
-	return new Date( Number(year), Number(month) + 1 , 0 ).getDate();
+	return new Date( Number(year), Number(month) , 0 ).getDate();
 };
 
 
-var Day = function () {
-	this.hey = true;
+Day = function (year, month, day) {
+	var inp, lab;
+	this.date = new Date( year, month-1, day );
+	this.year = year;
+	this.month = month;
+	this.checked = false;
+	this.blocked = false;
+	this.code = Number( year + '' + zero(month) + '' + zero(day) );
+	this.el = document.createElement( 'div' );
+	this.el.setAttribute( 'data-almaday', this.code );
+	this.name = _opts.name;
+	this.id = this.name+ '' + this.code;
+
+	// create input
+	inp = this.inp = document.createElement( 'input' );
+
+	// Single or multiple selection
+	_opts.multi ? inp.type= 'checkbox' : inp.type = 'radio';
+	_opts.multi ? inp.name = this.id : inp.name = this.name;
+
+	// create label
+	lab = this.lab = document.createElement( 'label' );
+	lab.innerHTML = this.date.getDate();
+	lab.setAttribute( 'for' , this.id );
+
+	// insert elements into html
+	this.el.appendChild( inp );
+	this.el.appendChild( lab );
 };
 
 // month constructor
 Month = function (alma, code) {
+	// assign month in almanac dates
 	alma.dates[ code ] = this;
-	var year = this.year = code.slice(0,4),
+	var year = this.year = Number( code.slice(0,4) ),
 		days = this.days = [],
-		num = this.number = code.slice(4,6),
-		el, i = 0, n = nDays( year, num );
+		num = this.month = Number( code.slice( 4,6 )),
+		// get total days of the month
+		n = nDays( year, num ),
+		el, i = 0;
 
 	this.revealed = false;
 
 
-	// get total days of the month
-
-
 	// create and insert calendar div
 	el = this.el = document.createElement( 'div' );
-	el.setAttribute( 'data-almaMonth', num );
+	el.setAttribute( 'data-almamonth', code );
 
 	// insertheader with month name
 	var header = this.header =  document.createElement( 'header' );
-	header.innerHTML = alma.settings.monthNames[ Number(num) ] + ' ' + year.slice(2,4);
+	header.innerHTML = alma.settings.monthNames[ Number(num) - 1 ] + ' ' + year.toString().slice(2,4);
 	el.appendChild( header );
 
 	// insert blank space before first month day
@@ -196,19 +227,10 @@ Month = function (alma, code) {
 
 	// generate days
 	while (i < n) {
-		days.push( new Day());
-		el.appendChild( document.createElement( 'div') );
+		days.push( new Day( year, num, i));
+		el.appendChild( days[i].el );
 		i++;
 	}
-	/*
-	for ( i = 1; i < nDays + 1; i++ ) {
-
-		// create day and insert in array
-		days[i] = new Day( alma, new Date(year, month, i) );
-
-		el.appendChild( days[i].el );
-	};
-	*/
 };
 
 Month.prototype.show = function () {
@@ -295,7 +317,7 @@ var Almanac = function (target, options) {
 		throw new Error( 'options has to be a object' );
 	}
 	this.el = target;
-	var opts = this.settings = options || {};
+	var opts = _opts = this.settings = options || {};
 	opts.name = opts.name || this.el.getAttribute('name') || false;
 
 	// throw error on bad name property
@@ -363,6 +385,8 @@ var Almanac = function (target, options) {
 		this.header = new Header( this );
 		this.el.appendChild( this.header.el );
 	}
+	// set custom data in element
+	this.el.setAttribute( 'data-almanac', '' );
 
 	show.call( this );
 };
