@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, Month, zero, show, getMonthCode, reveal;
+var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, Month, zero, show, getMonthCode, reveal,nDays;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -137,37 +137,71 @@ reveal = function () {
 	var r = this.revealed,
 		d = this.dates,
 		i;
+
+	// render required months
 	for (i in r) {
+		// check if month is in dates object
 		if (!d[ r[i] ]) {
+			// add month to dates
 			d[ r[i] ] = new Month( this, r[i] );
 		}
 	}
+	// hide and show rendered months
+	for (i in d) {
+		// check if month is shown
+		if (this.revealed.indexOf( i )) {
+			d[i].show();
+		} else {
+			d[i].hide();
+		}
+	}
+};
+
+
+// get number of days in month
+nDays = function (year, month) {
+	return new Date( Number(year), Number(month) + 1 , 0 ).getDate();
+};
+
+
+var Day = function () {
+	this.hey = true;
 };
 
 // month constructor
 Month = function (alma, code) {
 	alma.dates[ code ] = this;
-	var days = this.days = [],
-		num = this.number = 1;
+	var year = this.year = code.slice(0,4),
+		days = this.days = [],
+		num = this.number = code.slice(4,6),
+		el, i = 0, n = nDays( year, num );
 
-	this.year = code.slice(0,4);
+	this.revealed = false;
+
 
 	// get total days of the month
 
 
 	// create and insert calendar div
-	//el = this.el = document.createElement('div');
-	//el.setAttribute( 'data-almaMonth', num );
+	el = this.el = document.createElement( 'div' );
+	el.setAttribute( 'data-almaMonth', num );
 
 	// insertheader with month name
-	//el.innerHTML = '<header>' + alma.opts.monthNames[ num ] + ' ' + 'year' + '</header>';
+	var header = this.header =  document.createElement( 'header' );
+	header.innerHTML = alma.settings.monthNames[ Number(num) ] + ' ' + year.slice(2,4);
+	el.appendChild( header );
 
 	// insert blank space before first month day
-	//el.innerHTML += renderIndent( new Date( year, month, 1 ).getDay());
-	//el.setAttribute( 'class', 'hide');
+	// el.innerHTML += renderIndent( new Date( year, month, 1 ).getDay());
 
 	// generate days
-	/*for ( i = 1; i < nDays + 1; i++ ) {
+	while (i < n) {
+		days.push( new Day());
+		el.appendChild( document.createElement( 'div') );
+		i++;
+	}
+	/*
+	for ( i = 1; i < nDays + 1; i++ ) {
 
 		// create day and insert in array
 		days[i] = new Day( alma, new Date(year, month, i) );
@@ -177,9 +211,13 @@ Month = function (alma, code) {
 	*/
 };
 
+Month.prototype.show = function () {
 
+};
 
+Month.prototype.hide = function () {
 
+};
 
 
 /**

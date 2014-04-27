@@ -8,7 +8,10 @@ var bulkElem = function () {
 	return el;
 };
 
-
+// check if is array
+var isArray = function (arr) {
+	return arr && {}.toString.call( arr ) === '[object Array]';
+};
 /**
  * add zero to number if < 10
  * @param  {Number} n number to put zero into
@@ -340,19 +343,44 @@ describe( 'Month', function () {
 
 		var el = bulkElem();
 		var almanac = new Almanac( el );
-		it( 'has number `year` property in format YYYY', function () {
-			var today = new Date();
-			expect( almanac.dates[getMonthCode( today )] ).to.exist;
+		var today = new Date();
+		var firstMonth;
+		var monthCode = getMonthCode( today );
+		it( 'sets itself in Almanac.dates', function () {
+			firstMonth = almanac.dates[getMonthCode( today )]
+			expect( firstMonth ).to.exist;
 		});
-		it( 'has number`month` property' );
-		it( 'has boolean `revealed` property' );
-		it( 'insert itself in Almanac.dates');
-		it( 'has `days` array ');
-		it( 'has `el` property containing HTML month element' );
-		it( '`el` has data-almaMonth property and it is correct' );
+		it( 'has number `year` property in format YYYY', function () {
+			expect( firstMonth.year ).to.equal( monthCode.slice(0,4) );
+		});
+		it( 'has number `month` property', function () {
+			expect( firstMonth ).to.exist;
+		});
+		it( 'has `el` property containing HTML month element', function () {
+			expect( firstMonth.el ).to.exist;
+		});
+		it( 'has `days` array ', function () {
+			expect( firstMonth.days ).to.exist;
+			expect( isArray( almanac.dates[getMonthCode( today )].days )).to.equal( true );
+		});
+		it( 'has `revealed` property', function () {
+			expect( firstMonth.revealed ).to.exist;
+		});
+		it( '`el` has data-almaMonth property and it is correct', function () {
+			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.exist;
+			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.equal( monthCode.slice(4,6) );
+		});
+		it( 'renders correct header in month element', function () {
+			expect( firstMonth.el.getElementsByTagName( 'header' )[0] ).to.exist;
+			var monthTitle = almanac.settings.monthNames[Number( monthCode.slice( 4,6 ))] + ' ' + monthCode.slice( 2,4 );
+			expect( firstMonth.header.innerHTML ).to.equal( monthTitle );
+		});
 		it( 'renders correct indent in month element' );
-		it( 'has the correct number of days' );
-		it( 'starts with the correct day' );
+		it( 'has the correct number of days', function () {
+			var daysInMonth = new Date( Number(monthCode.slice(2,4)), Number(monthCode.slice(4, 6)) + 1 , 0 ).getDate();
+			expect( firstMonth.days.length ).to.equal( daysInMonth );
+		} );
+		it( 'starts with the correct day of the week' );
 		it( 'print days in calendar' );
 	});
 
