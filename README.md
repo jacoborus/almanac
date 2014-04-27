@@ -46,6 +46,13 @@ var cal = new Almanac( elem, {
 });
 ```
 
+## Tests
+
+To run tests (mocha & chai):
+
+```
+npm install && npm test
+```
 
 <br><br>
 

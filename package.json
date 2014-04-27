@@ -4,7 +4,7 @@
   "description": "HTML5 calendar element",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "sensible-browser ./test/test.html"
   },
   "keywords": [
     "calendar",

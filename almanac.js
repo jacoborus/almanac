@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames;
+var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -65,6 +65,53 @@ validMonthNames = function () {
 	}
 	return true;
 };
+
+// inject css in html header
+addCSS = function () {
+	var s = document.getElementById('almanac-style'),
+		createStyle = 'almanac *{text-align:center;box-sizing:border-box;transition:all .3s}';
+
+	if (s === null) {
+		s = document.createElement( 'style' );
+		s.type = 'text/css';
+		s.setAttribute( 'id', 'almanac-style');
+		document.getElementsByTagName('head')[0].appendChild( s );
+		if (s.styleSheet) {   // IE
+			s.styleSheet.cssText = createStyle;
+		} else {              // the world
+			s.appendChild(document.createTextNode( createStyle ));
+		}
+	}
+};
+
+
+
+
+Header = function (alma) {
+
+	var header, left, right;
+
+	left  = this.left = document.createElement( 'a' );
+	left.innerHTML = '&lt;';
+	left.setAttribute( 'class', 'floatleft');
+	left.onclick = function () {
+		alma.prev();
+	};
+	right = this.right = document.createElement( 'a' );
+	right.setAttribute( 'class', 'floatright');
+	right.innerHTML = '&gt;';
+	right.onclick = function () {
+		alma.next();
+	};
+	header = this.header = document.createElement( 'header' );
+	header.appendChild( left );
+	header.appendChild( right );
+	this.el = header;
+};
+
+
+
+
 
 /**
  * Create an almanac in/at `target` with passed options.
@@ -165,9 +212,28 @@ var Almanac = function (target, options) {
 
 	// hideHeader
 	opts.hideHeader = opts.hideHeader || false;
+
+	this.dates = {};
+	this.cursor = 0;
+
+	addCSS();
+
+	// add header
+	if (!opts.hideHeader) {
+		this.header = new Header( this );
+		this.el.appendChild( this.header.el );
+	}
 };
 
 
+
+Almanac.prototype.next = function () {
+	this.cursor++;
+};
+
+Almanac.prototype.prev = function () {
+	this.cursor--;
+};
 
 // node.js
 if((typeof module !== 'undefined') && (typeof module.exports !== 'undefined')) {
