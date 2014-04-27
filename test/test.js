@@ -282,3 +282,70 @@ describe( 'Header', function () {
 		expect( almanac.cursor ).to.equal( 1 );
 	});
 });
+
+describe( 'impress', function () {
+
+	var el = bulkElem();
+	var almanac = new Almanac( el );
+	it( 'print the correct number of default months', function () {
+		expect( almanac.el.querySelectorAll( '[data-almaMonth]' ).length ).to.equal( 1 );
+	});
+
+	var el2 = bulkElem();
+	var almanac2 = new Almanac( el2, {showMonths: 4} );
+	it( 'print the correct number of months from options', function () {
+		expect( almanac2.el.querySelectorAll( '[data-almaMonth]' ).length ).to.equal( 4 );
+	});
+});
+
+describe( 'Month', function () {
+
+	describe( 'constructor', function () {
+
+		var el = bulkElem();
+		var almanac = new Almanac( el );
+		it( 'has number `year` property' );
+		it( 'has number`month` property' );
+		it( 'has boolean `revealed` property' );
+		it( 'insert itself in Almanac.dates');
+		it( 'has `days` array ');
+		it( 'has `el` property containing HTML month element' );
+		it( '`el` has data-almaMonth property and it is correct' );
+		it( 'renders correct indent in month element' );
+		it( 'has the correct number of days' );
+		it( 'starts with the correct day' );
+		it( 'print days in calendar' );
+	});
+
+	describe( '#show', function () {
+		it( 'change `revealed` property')
+		it( 'hide the month element' );
+	});
+
+	describe( '#hide', function () {
+		it( 'change `revealed` property')
+		it( 'hide the month element' );
+	});
+});
+
+describe( 'Day', function () {
+
+	describe( 'constructor', function () {
+
+		it( 'has number `year` property' );
+		it( 'has number `month` property' );
+		it( 'has boolean `checked` property' );
+		it( 'insert itself in month.days');
+		it( 'has `el` property containing HTML day element (label+input)' );
+		it( '`el` has data-almanacDay property and it is correct' );
+		it( 'prints itself in calendar' );
+	});
+
+	describe( '#check', function () {
+		it( 'change `checked` to `true` property in element and object')
+	});
+
+	describe( '#uncheck', function () {
+		it( 'change `checked` property to `false` in element and object')
+	});
+});

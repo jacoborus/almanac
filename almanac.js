@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header;
+var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, impress, Month;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -84,9 +84,63 @@ addCSS = function () {
 	}
 };
 
+var bulkMonth = function () {
+	var el = document.createElement( 'div' );
+	el.setAttribute( 'data-almaMonth', 1 );
+	return el;
+};
+
+impress = function () {
+	var i = 0;
+	while (i < this.settings.showMonths) {
+		this.el.appendChild( bulkMonth() );
+		i++;
+	}
+};
 
 
 
+
+// month constructor
+Month = function (alma) {
+	var days = this.days = [],
+		num = this.number = 1;
+
+	// get total days of the month
+
+
+	// create and insert calendar div
+	//el = this.el = document.createElement('div');
+	//el.setAttribute( 'data-almaMonth', num );
+
+	// insertheader with month name
+	//el.innerHTML = '<header>' + alma.opts.monthNames[ num ] + ' ' + 'year' + '</header>';
+
+	// insert blank space before first month day
+	//el.innerHTML += renderIndent( new Date( year, month, 1 ).getDay());
+	//el.setAttribute( 'class', 'hide');
+
+	// generate days
+	/*for ( i = 1; i < nDays + 1; i++ ) {
+
+		// create day and insert in array
+		days[i] = new Day( alma, new Date(year, month, i) );
+
+		el.appendChild( days[i].el );
+	};
+	*/
+}
+
+
+
+
+
+
+/**
+ * Almanac header constructor
+ * @param {Object} alma almanac object
+ * @private
+ */
 Header = function (alma) {
 
 	var header, left, right;
@@ -184,7 +238,9 @@ var Almanac = function (target, options) {
 		}
 	}
 	// set id
-	this.el.setAttribute( 'id', opts.id );
+	if (opts.id) {
+		this.el.setAttribute( 'id', opts.id );
+	}
 
 	// classes
 	if (opts.classes) {
@@ -223,6 +279,8 @@ var Almanac = function (target, options) {
 		this.header = new Header( this );
 		this.el.appendChild( this.header.el );
 	}
+
+	impress.call( this );
 };
 
 
