@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, impress, Month;
+var isNode, isElement, isDOM, startsWithNumber, checkClasses, setClasses, isArray, validMonthNames, addCSS, Header, Month, zero, show, getMonthCode, reveal;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -23,6 +23,8 @@ isDOM = function (o) {
 	return (isNode( o ) || isElement( o ));
 };
 
+
+// check if a string starts with a number
 startsWithNumber = function (text) {
 	if (Number(text[0])) {
 		return true;
@@ -31,6 +33,7 @@ startsWithNumber = function (text) {
 	}
 };
 
+// check if String with list of HTML classes separated by spaces is correct
 checkClasses = function (classes) {
 	var l = classes.split(' '), i;
 	for (i in l) {
@@ -52,9 +55,12 @@ setClasses = function () {
 	}
 };
 
-isArray = function (fn) {
-	return fn && {}.toString.call( fn ) === '[object Array]';
+
+// check if is array
+isArray = function (arr) {
+	return arr && {}.toString.call( arr ) === '[object Array]';
 };
+
 
 validMonthNames = function () {
 	var l = this.settings.monthNames, i;
@@ -75,36 +81,76 @@ addCSS = function () {
 		s = document.createElement( 'style' );
 		s.type = 'text/css';
 		s.setAttribute( 'id', 'almanac-style');
-		document.getElementsByTagName('head')[0].appendChild( s );
+		document.getElementsByTagName( 'head' )[0].appendChild( s );
 		if (s.styleSheet) {   // IE
 			s.styleSheet.cssText = createStyle;
 		} else {              // the world
-			s.appendChild(document.createTextNode( createStyle ));
+			s.appendChild( document.createTextNode( createStyle ));
 		}
 	}
 };
 
-var bulkMonth = function () {
-	var el = document.createElement( 'div' );
-	el.setAttribute( 'data-almaMonth', 1 );
-	return el;
-};
-
-impress = function () {
-	var i = 0;
-	while (i < this.settings.showMonths) {
-		this.el.appendChild( bulkMonth() );
-		i++;
+/**
+ * add zero to number if < 10
+ * @param  {Number} n number to put zero into
+ * @return {Number}   2 digits number
+ */
+zero = function (n) {
+	if (n < 10) {
+		return '0' + n;
+	} else {
+		return n;
 	}
 };
 
+// get get month code in format YYYYMM from a date object
+getMonthCode = function (d) {
+	return d.getFullYear() + '' + (zero( d.getMonth()+1 ));
+};
 
 
+// sets the list of months to show at Almanac.revealed
+
+show = function () {
+	// get a copy of first day date
+	var d = new Date( this.settings.firstDay ),
+		i = 0, e;
+
+	// empty revealed list
+	this.revealed = [];
+
+	// set first month to reveal
+	d.setMonth( d.getMonth() + this.cursor );
+
+	// add months
+	while (i < this.settings.showMonths) {
+		e = new Date( d );
+		e.setMonth( e.getMonth() + i );
+		this.revealed.push( getMonthCode( e ));
+		i++;
+	}
+	reveal.call( this );
+};
+
+// render months that need to be rendered from Almanac.revealed
+reveal = function () {
+	var r = this.revealed,
+		d = this.dates,
+		i;
+	for (i in r) {
+		if (!d[ r[i] ]) {
+			d[ r[i] ] = new Month( this, r[i] );
+		}
+	}
+};
 
 // month constructor
-Month = function (alma) {
+Month = function (alma, code) {
+	alma.dates[ code ] = this;
 	var days = this.days = [],
 		num = this.number = 1;
+
+	this.year = code.slice(0,4);
 
 	// get total days of the month
 
@@ -129,7 +175,7 @@ Month = function (alma) {
 		el.appendChild( days[i].el );
 	};
 	*/
-}
+};
 
 
 
@@ -141,6 +187,7 @@ Month = function (alma) {
  * @param {Object} alma almanac object
  * @private
  */
+
 Header = function (alma) {
 
 	var header, left, right;
@@ -162,8 +209,6 @@ Header = function (alma) {
 	header.appendChild( right );
 	this.el = header;
 };
-
-
 
 
 
@@ -199,6 +244,7 @@ Header = function (alma) {
  * @param {HTML element} target  Element to replace, or embed in the almanac
  * @param {Object} options
  */
+
 var Almanac = function (target, options) {
 	// check arguments
 	if (!target) {
@@ -280,17 +326,19 @@ var Almanac = function (target, options) {
 		this.el.appendChild( this.header.el );
 	}
 
-	impress.call( this );
+	show.call( this );
 };
 
 
 
 Almanac.prototype.next = function () {
 	this.cursor++;
+	show.call( this );
 };
 
 Almanac.prototype.prev = function () {
 	this.cursor--;
+	show.call( this );
 };
 
 // node.js
