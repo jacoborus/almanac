@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "sensible-browser ./test/test.html",
-    "build": ""
+    "csscompress": "./node_modules/gulp/bin/gulp.js csso",
+    "hogan": "./node_modules/gulp/bin/gulp.js hogan",
+    "jshint": "./node_modules/gulp/bin/gulp.js jshint",
+    "min": "./node_modules/gulp/bin/gulp.js min",
+    "clean": "./node_modules/gulp/bin/gulp.js clean",
+    "build": "npm run csscompress && npm run hogan && npm run jshint && npm run min && npm run clean"
   },
   "keywords": [
     "calendar",
@@ -25,10 +30,13 @@
   "devDependencies": {
     "chai": "^1.9.1",
     "gulp": "^3.6.2",
+    "gulp-clean": "^0.2.4",
     "gulp-cssmin": "^0.1.4",
     "gulp-hogan": "0.0.1",
     "gulp-jshint": "^1.5.5",
     "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^0.2.1",
+    "jshint-stylish": "^0.2.0",
     "mocha": "^1.18.2"
   }
 }
