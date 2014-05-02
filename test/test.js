@@ -8,6 +8,22 @@ var bulkElem = function () {
 	return el;
 };
 
+var hasClass = function (el, cls) {
+	if (el.classList) {
+		return el.classList.contains( cls );
+	} else {
+		return new RegExp( '(^| )' + cls + '( |$)', 'gi' ).test( el.className );
+	}
+}
+
+var addClass = function (el, className) {
+	if (el.classList) {
+		el.classList.add(className);
+	} else {
+		el.className += ' ' + className;
+	}
+};
+
 // check if is array
 var isArray = function (arr) {
 	return arr && {}.toString.call( arr ) === '[object Array]';
@@ -94,8 +110,10 @@ describe( 'Almanac', function () {
 
 		it( 'sets the name from html', function () {
 			var el = document.getElementById( 'almanac' );
-			var almanac = new Almanac( el, {showMonths: 4} );
+			var almanac = new Almanac( el, {showMonths: 2, multi: true} );
 			expect( almanac.settings.name ).to.equal( 'example' );
+			almanac.dates[201404].days[14].check();
+			console.log( almanac.dates[201404].days );
 		});
 
 		it( 'sets the name from options', function () {
@@ -411,13 +429,36 @@ describe( 'Month', function () {
 	});
 
 	describe( '#show', function () {
-		it( 'change `revealed` property');
-		it( 'hide the month element' );
+		var el = bulkElem();
+		var almanac = new Almanac( el );
+		var today = new Date();
+		var firstMonth;
+		var monthCode = getMonthCode( today );
+		almanac.dates[ monthCode ].revealed = false;
+		it( 'sets true `revealed` property', function () {
+			almanac.dates[ monthCode ].show();
+			expect( almanac.dates[ monthCode ].revealed ).to.equal( true );
+		});
+		it( 'show the month element', function () {
+			expect( hasClass( almanac.dates[ monthCode ].el, 'hidden' )).to.equal( false );
+		});
 	});
 
 	describe( '#hide', function () {
-		it( 'change `revealed` property');
-		it( 'hide the month element' );
+		var el = bulkElem();
+		var almanac = new Almanac( el );
+		var today = new Date();
+		var firstMonth;
+		var monthCode = getMonthCode( today );
+		almanac.dates[ monthCode ].revealed = true;
+		addClass( almanac.dates[ monthCode ].el, 'hidden' );
+		it( 'change `revealed` property', function () {
+			almanac.dates[ monthCode ].hide();
+			expect( almanac.dates[ monthCode ].revealed ).to.equal( false );
+		});
+		it( 'hide the month element', function () {
+			expect( hasClass( almanac.dates[ monthCode ].el, 'hidden' )).to.equal( true );
+		});
 	});
 });
 
@@ -466,21 +507,28 @@ describe( 'Day', function () {
 		});
 
 		it( 'has number `code` property equal its dat (YYYYMMDD)', function () {
-
 			expect( firstMonth.days[nToday].code ).to.equal( todayCode );
 		});
 		it( '`el` has data-almaday property and it equal its code', function () {
 			expect( firstMonth.days[nToday].el.getAttribute( 'data-almaday' )).to.equal( todayCode.toString() );
 		});
 
-		it( 'prints itself in calendar' );
+		it( 'binds click to check/uncheck' );
 	});
 
 	describe( '#check', function () {
-		it( 'change `checked` to `true` property in element and object');
+		it( 'change `checked` to `true` property in element and object', function () {
+			firstMonth.days[nToday].el.checked = undefined;
+			firstMonth.days[nToday].check();
+			expect( firstMonth.days[nToday].el.checked ).to.exist;
+		});
 	});
 
 	describe( '#uncheck', function () {
-		it( 'change `checked` property to `false` in element and object');
+		it( 'change `checked` property to `false` in element and object', function () {
+			firstMonth.days[nToday].el.checked = true;
+			firstMonth.days[nToday].uncheck();
+			expect( firstMonth.days[nToday].el.checked ).to.not.exist;
+		});
 	});
 });

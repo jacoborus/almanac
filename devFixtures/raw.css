@@ -42,12 +42,12 @@
 	margin: .5em;
 	overflow: hidden;
 }
-[data-almanac] [data-almamonth].hide {
+[data-almanac] [data-almamonth].hidden {
 	width: 0;
 	margin: 0;
 	padding: 0;
-	border: 0;
 	height: 0;
+	border: 0;
 }
 [data-almanac] [data-almamonth] header {
 	height: 12.28%;

@@ -1,9 +1,10 @@
 (function () {
 'use strict';
 
-var isNode, isElement, isDOM, startsWithNumber, checkClasses,
+var isNode, isElement, isDOM, checkClasses,
 	setClasses, isArray, validMonthNames, addCSS, Header, Month,
-	zero, show, getMonthCode, reveal, nDays, Day, _opts;
+	zero, show, getMonthCode, reveal, nDays, Day, addEventListener,
+	addClass, removeClass, validName;
 
 //Returns true if it is a DOM node
 isNode = function (o){
@@ -12,7 +13,6 @@ isNode = function (o){
 		o && typeof o === 'object' && typeof o.nodeType === 'number' && typeof o.nodeName==='string'
 	);
 };
-
 //Returns true if it is a DOM element
 isElement = function (o){
 	return (
@@ -20,38 +20,68 @@ isElement = function (o){
 		o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
 	);
 };
-
 isDOM = function (o) {
 	return (isNode( o ) || isElement( o ));
 };
 
-
-// check if a string starts with a number
-startsWithNumber = function (text) {
-	if (Number(text[0])) {
-		return true;
+removeClass = function (el, cls) {
+	// test for iE8-9
+	if (el.classList) {
+		// remove class
+		el.classList.remove( cls );
 	} else {
-		return false;
+		// remove class for iE8 & iE9
+		el.className = el.className.replace(new RegExp('(^|\\b)' + cls.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
 	}
 };
 
-// check if String with list of HTML classes separated by spaces is correct
+
+addClass = function (el, cls) {
+	if (el.classList){
+		el.classList.add( cls);
+	} else {
+		el.className += ' ' + cls;
+	}
+};
+
+
+// addEventListener for all
+addEventListener = function (el, eventName, handler) {
+	if (el.addEventListener) {
+		// the world
+		el.addEventListener( eventName, handler );
+	} else {
+		// Internet Explorer
+		el.attachEvent( 'on' + eventName, handler );
+	}
+};
+
+validName = function (cls) {
+	return (!/^[a-z_-][a-z\d_-]*$/i.test( cls )) ? false : true;
+};
+
+
+// check if String with list of HTML classes separated by spaces is correct and not start with number
 checkClasses = function (classes) {
 	var l = classes.split(' '), i;
 	for (i in l) {
-		if (startsWithNumber( l[i] )) {
-			return true;
+		if (!validName( l[i] )) {
+		   return true;
 		}
 	}
 	return false;
 };
 
+
+
 setClasses = function () {
 	var l = this.settings.classes.split(' '), i;
 	for (i in l) {
 		if (this.el.classList) {
+			// the browsers
 			this.el.classList.add( l[i] );
 		} else {
+			// iExplorer
 			this.el.className += ' ' + l[i];
 		}
 	}
@@ -66,6 +96,9 @@ isArray = function (arr) {
 
 validMonthNames = function () {
 	var l = this.settings.monthNames, i;
+	if (l.length !== 12) {
+		return false;
+	}
 	for (i in l) {
 		if (typeof l[i] !== 'string') {
 			return false;
@@ -77,7 +110,7 @@ validMonthNames = function () {
 // inject css in html header
 addCSS = function () {
 	var s = document.getElementById('almanac-style'),
-		createStyle = '[data-almanac]{padding:.5%}[data-almanac] *{text-align:center;box-sizing:border-box;transition:all .3s}[data-almanac] header{width:98%}[data-almanac] a.floatleft{float:left;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac] a.floatright{float:right;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac],[data-almanac] [data-almamonth],[data-almanac] header,[data-almanac] label{float:left;border:1px solid #aaa;border-radius:.3em;background-color:#fff;color:#333;line-height:2.5em}[data-almanac] [data-almaday],[data-almanac] [data-almamonth] header{height:12.28%;margin:1%}[data-almanac] [data-almamonth]{width:21em;height:21em;padding:.5em;margin:.5em;overflow:hidden}[data-almanac] [data-almamonth].hide{width:0;margin:0;padding:0;border:0;height:0}[data-almanac] [data-almamonth] header{height:12.28%}[data-almanac] [data-almaday]{float:left;width:12.28%}[data-almanac] [data-almaday] input{display:none}[data-almanac] [data-almaday] label{width:100%;height:100%;cursor:pointer}[data-almanac] [data-almaday]:hover label{background:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:checked+label,[data-almanac] [data-almaday] input[type=radio]:checked+label{background-color:#333;color:#fff}';
+		CSSs = '{{injectCSS}}';
 
 	if (s === null) {
 		s = document.createElement( 'style' );
@@ -85,9 +118,9 @@ addCSS = function () {
 		s.setAttribute( 'id', 'almanac-style');
 		document.getElementsByTagName( 'head' )[0].appendChild( s );
 		if (s.styleSheet) {   // IE
-			s.styleSheet.cssText = createStyle;
+			s.styleSheet.cssText = CSSs;
 		} else {              // the world
-			s.appendChild( document.createTextNode( createStyle ));
+			s.appendChild( document.createTextNode( CSSs ));
 		}
 	}
 };
@@ -98,11 +131,7 @@ addCSS = function () {
  * @return {Number}   2 digits number
  */
 zero = function (n) {
-	if (n < 10) {
-		return '0' + n;
-	} else {
-		return n;
-	}
+	return (n < 10) ? '0' + n : n;
 };
 
 // get get month code in format YYYYMM from a date object
@@ -112,7 +141,6 @@ getMonthCode = function (d) {
 
 
 // sets the list of months to show at Almanac.revealed
-
 show = function () {
 	// get a copy of first day date
 	var d = new Date( this.settings.firstDay ),
@@ -169,8 +197,8 @@ nDays = function (year, month) {
 };
 
 
-Day = function (year, month, day) {
-	var inp, lab;
+Day = function (alma, year, month, day) {
+	var self = this, inp, lab;
 	this.date = new Date( year, month-1, day );
 	this.year = year;
 	this.month = month;
@@ -179,15 +207,24 @@ Day = function (year, month, day) {
 	this.code = Number( year + '' + zero(month) + '' + zero(day) );
 	this.el = document.createElement( 'div' );
 	this.el.setAttribute( 'data-almaday', this.code );
-	this.name = _opts.name;
-	this.id = this.name+ '' + this.code;
+	this.name = alma.settings.name;
+	this.id = this.name + '' + this.code;
 
 	// create input
 	inp = this.inp = document.createElement( 'input' );
 
 	// Single or multiple selection
-	_opts.multi ? inp.type= 'checkbox' : inp.type = 'radio';
-	_opts.multi ? inp.name = this.id : inp.name = this.name;
+	inp.type = alma.settings.multi ? 'checkbox' : 'radio';
+	inp.name = alma.settings.multi ? this.id : this.name;
+	inp.id = this.id;
+
+
+
+	// binding for checked prop
+	addEventListener( inp, 'change', function (e) {
+		self.checked = (e.target.checked !== false) ? true : false;
+	});
+
 
 	// create label
 	lab = this.lab = document.createElement( 'label' );
@@ -198,6 +235,15 @@ Day = function (year, month, day) {
 	this.el.appendChild( inp );
 	this.el.appendChild( lab );
 };
+
+Day.prototype.check = function () {
+	this.el.checked = true;
+};
+
+Day.prototype.uncheck = function () {
+	this.el.checked = undefined;
+};
+
 
 // month constructor
 Month = function (alma, code) {
@@ -227,18 +273,20 @@ Month = function (alma, code) {
 
 	// generate days
 	while (i < n) {
-		days.push( new Day( year, num, i));
+		days.push( new Day( alma, year, num, i));
 		el.appendChild( days[i].el );
 		i++;
 	}
 };
 
 Month.prototype.show = function () {
-
+	this.revealed = true;
+	removeClass( this.el, 'hidden' );
 };
 
 Month.prototype.hide = function () {
-
+	this.revealed = false;
+	addClass( this.el, 'hidden');
 };
 
 
@@ -317,7 +365,7 @@ var Almanac = function (target, options) {
 		throw new Error( 'options has to be a object' );
 	}
 	this.el = target;
-	var opts = _opts = this.settings = options || {};
+	var opts = this.settings = options || {};
 	opts.name = opts.name || this.el.getAttribute('name') || false;
 
 	// throw error on bad name property
@@ -339,7 +387,7 @@ var Almanac = function (target, options) {
 	// check for valid id property
 	opts.id = opts.id || this.el.getAttribute('id') || false;
 	if (opts.id) {
-		if (typeof opts.id !== 'string' || startsWithNumber( opts.id )) {
+		if (typeof opts.id !== 'string' || !validName( opts.id )) {
 			throw new Error( 'Invalid id property' );
 		}
 	}
@@ -407,7 +455,7 @@ Almanac.prototype.prev = function () {
 if((typeof module !== 'undefined') && (typeof module.exports !== 'undefined')) {
 	module.exports = Almanac;
 // browser
-} else if(typeof window !== 'undefined') {
+} else if (typeof window !== 'undefined') {
 	window.Almanac = Almanac;
 }
 
