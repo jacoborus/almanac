@@ -10,6 +10,7 @@ var gulp = require('gulp'),
 	fs = require('fs');
 
 gulp.task('csso', function (cb) {
+	console.log( 'csso' );
 	return gulp.src('devFixtures/raw.css')
 		.pipe(cssmin())
 		.pipe(rename({suffix: '.min'}))
@@ -17,6 +18,7 @@ gulp.task('csso', function (cb) {
 });
 
 gulp.task('hogan', function(){
+	console.log( 'render template' );
 	var CSSs = fs.readFileSync( 'dist/raw.min.css', 'utf8');
 	console.log( CSSs );
 	gulp.src('src/almanac.js')
@@ -26,6 +28,7 @@ gulp.task('hogan', function(){
 
 // JS hint task
 gulp.task('jshint', function() {
+	console.log( 'jshint' );
 	gulp.src('./dist/almanac.js')
 	.pipe( jshint() )
 	.pipe( jshint.reporter( stylish ));
@@ -33,6 +36,7 @@ gulp.task('jshint', function() {
 
 
 gulp.task( 'min', function () {
+	console.log( 'min' );
 	// Single entry point to browserify
 	gulp.src( './dist/almanac.js' )
 	.pipe( uglify() )
@@ -41,6 +45,7 @@ gulp.task( 'min', function () {
 });
 
 gulp.task( 'clean', function () {
+	console.log( 'clean' );
     gulp.src( 'dist/raw.min.css', {read: false})
         .pipe(clean());
 });

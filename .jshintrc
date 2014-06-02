@@ -19,10 +19,12 @@
 	"smarttabs": true,
 	"globals": {
 		"require": false,
-		"module": false,
 		"describe": false,
 		"it": false,
-		"Almanac": false,
-		"chai": false
+		"chai": false,
+		"document": false,
+		"Node": false,
+		"HTMLElement": false,
+		"window": false
 	}
 }
