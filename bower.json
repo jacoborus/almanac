@@ -1,0 +1,28 @@
+{
+  "name": "almanac",
+  "version": "0.0.1",
+  "homepage": "https://github.com/jacoborus/almanac",
+  "authors": [
+    "Jacobo Tabernero <jacobo@xarope.eu>"
+  ],
+  "description": "HTML5 calendar element. Not ready for production.",
+  "main": "dist/almanac.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "calendar",
+    "HTML5",
+    "dates",
+    "picker",
+    "almanac"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

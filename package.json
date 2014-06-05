@@ -1,7 +1,7 @@
 {
   "name": "almanac",
-  "version": "0.0.0",
-  "description": "HTML5 calendar element",
+  "version": "0.0.1",
+  "description": "HTML5 calendar element. Not ready for production.",
   "main": "index.js",
   "scripts": {
     "test": "sensible-browser ./test/test.html",
@@ -10,7 +10,9 @@
     "jshint": "./node_modules/gulp/bin/gulp.js jshint",
     "min": "./node_modules/gulp/bin/gulp.js min",
     "clean": "./node_modules/gulp/bin/gulp.js clean",
-    "build": "npm run csscompress && npm run hogan && npm run jshint && npm run min && npm run clean"
+    "build": "npm run csscompress && npm run hogan && npm run jshint && npm run min && npm run clean",
+    "dev": "npm run csscompress && npm run hogan && npm run watch",
+    "watch": "./node_modules/gulp/bin/gulp.js watch"
   },
   "keywords": [
     "calendar",
