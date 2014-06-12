@@ -14,7 +14,7 @@ var hasClass = function (el, cls) {
 	} else {
 		return new RegExp( '(^| )' + cls + '( |$)', 'gi' ).test( el.className );
 	}
-}
+};
 
 var addClass = function (el, className) {
 	if (el.classList) {
@@ -39,7 +39,7 @@ var zero = function (n) {
 
 // get get month code in format YYYYMM from a date object
 var getMonthCode = function (d) {
-	return d.getFullYear() + '' + (zero( d.getMonth()+1 ));
+	return Number( d.getFullYear() + '' + zero( d.getMonth()+1 ));
 };
 // var rendered = almanac.createCalendar( document.getElementById( 'rendered' ));
 /** -- ALMANAC -- **/
@@ -150,7 +150,7 @@ describe( 'Almanac', function () {
 		it( 'sets `id` property from options', function () {
 			var el = bulkElem();
 			var calendar = almanac.createCalendar( el, {id: 'hey'});
-			expect( almanac.el.getAttribute( 'id' )).to.equal( 'hey' );
+			expect( calendar.el.getAttribute( 'id' )).to.equal( 'hey' );
 		});
 
 
@@ -169,7 +169,7 @@ describe( 'Almanac', function () {
 		it( 'sets `classes` property from options', function () {
 			var el = bulkElem();
 			var calendar = almanac.createCalendar( el, {classes: 'hey hola'});
-			expect( almanac.el.getAttribute( 'class' )).to.equal( 'hey hola' );
+			expect( calendar.el.getAttribute( 'class' )).to.equal( 'hey hola' );
 		});
 
 
@@ -246,7 +246,7 @@ describe( 'Almanac', function () {
 		it( 'set custom data "data-almanac" to element', function () {
 			var el = bulkElem();
 			var calendar = almanac.createCalendar( el );
-			expect( almanac.el.getAttribute( 'data-almanac' ) ).to.exist;
+			expect( calendar.el.getAttribute( 'data-almanac' )).to.exist;
 		});
 
 		// cursor
@@ -271,7 +271,7 @@ describe( 'Almanac', function () {
 		it( 'append header to calendar element if required', function () {
 			var el = bulkElem();
 			var calendar = almanac.createCalendar( el );
-			expect( almanac.el.getElementsByTagName( 'header' )[0] ).to.exist;
+			expect( calendar.el.getElementsByTagName( 'header' )[0] ).to.exist;
 		});
 	});
 
@@ -298,37 +298,197 @@ describe( 'Almanac', function () {
 
 });
 
-describe( 'Header', function () {
 
-	var el = bulkElem();
-	var calendar = almanac.createCalendar( el, {noHeader: false} );
-	var header = almanac.el.getElementsByTagName( 'header' )[0];
-	var left = header.getElementsByTagName( 'a' )[0];
-	var right = header.getElementsByTagName( 'a' )[1];
 
-	it( 'append prev and next buttons', function () {
-		expect( left ).to.exist;
-		expect( right ).to.exist;
+
+
+describe( 'Month', function () {
+
+	describe( 'constructor', function () {
+
+		var el = bulkElem();
+		var calendar = almanac.createCalendar( el );
+		var today = new Date();
+		var firstMonth;
+		var monthCode = getMonthCode( today );
+
+		it( 'sets itself in Almanac.months', function () {
+			firstMonth = calendar.months[getMonthCode( today )];
+			expect( firstMonth ).to.exist;
+		});
+
+		it( 'has `year` property in format "YYYY"', function () {
+			expect( firstMonth.data.year ).to.equal( monthCode.toString().slice( 0, 4 ));
+		});
+
+		it( 'has `month` property in format "MM"', function () {
+			expect( firstMonth.data.month ).to.equal( monthCode.toString().slice( 4, 6 ));
+		});
+
+		it( 'has `el` property containing HTML month element', function () {
+			expect( firstMonth.el ).to.exist;
+		});
+
+		it( 'has `days` array ', function () {
+			expect( firstMonth.days ).to.exist;
+			expect( isArray( calendar.months[getMonthCode( today )].days )).to.equal( true );
+		});
+
+		it( 'has `visible` property', function () {
+			expect( firstMonth.visible ).to.exist;
+		});
+
+		it( '`el` has data-almaMonth property and it is correct', function () {
+			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.exist;
+			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.equal( monthCode.toString() );
+		});
+
+
+		it( 'starts with the correct day of the week', function (){
+			var elem = bulkElem();
+			var alma = almanac.createCalendar( elem, {firstMonth: new Date( 2014, 5, 1 )});
+			var dia = alma.months[ monthCode ].days[0];
+			expect( dia.getInfo().weekDay ).to.equal( 0 );
+		});
+
+		it( 'print days in calendar', function () {
+			expect( firstMonth.el.getElementsByTagName( 'div' ).length ).to.be.above( 27 );
+		});
+
+		it( 'has the correct number of days', function () {
+			var daysInMonth = new Date( Number(monthCode.toString().slice(2,4)), Number(monthCode.toString().slice(4, 6) ) , 0 ).getDate();
+			expect( firstMonth.days.length ).to.equal( daysInMonth );
+		});
 	});
 
-	it( 'buttons move the cursor', function () {
-		right.click();
-		expect( calendar.get( 'cursor' )).to.equal( 1 );
-		left.click();
-		expect( calendar.get( 'cursor' )).to.equal( 0 );
-	});
-});
-
-describe( 'show', function () {
-	it( 'sets months to show in Almanac.revealed', function () {
+	describe( '#show', function () {
 		var el = bulkElem();
 		var calendar = almanac.createCalendar( el );
 		var today = new Date();
 		var monthCode = getMonthCode( today );
-		expect( calendar.get( 'revealed' )[0].code ).to.equal( monthCode );
+		calendar.months[ monthCode ].visible = false;
+		it( 'sets true `visible` property', function () {
+			calendar.months[ monthCode ].show();
+			expect( calendar.months[ monthCode ].visible ).to.equal( true );
+		});
+		it( 'show the month element', function () {
+			expect( hasClass( calendar.months[ monthCode ].el, 'hidden' )).to.equal( false );
+		});
 	});
 
+	describe( '#hide', function () {
+		var el = bulkElem();
+		var calendar = almanac.createCalendar( el );
+		var today = new Date();
+		var monthCode = getMonthCode( today );
+		calendar.months[ monthCode ].visible = true;
+		addClass( calendar.months[ monthCode ].el, 'hidden' );
+		it( 'change `visible` property', function () {
+			calendar.months[ monthCode ].hide();
+			expect( calendar.months[ monthCode ].visible ).to.equal( false );
+		});
+		it( 'hide the month element', function () {
+			expect( hasClass( calendar.months[ monthCode ].el, 'hidden' )).to.equal( true );
+		});
+	});
+});
 
+describe( 'Day', function () {
+
+	var control = 0;
+	var el = bulkElem();
+	var calendar = almanac.createCalendar( el, {
+		onChange: function (val, dData) {
+			control = dData.code;
+		}
+	});
+	var today = new Date(2014, 5, 9);
+	var nToday = 9;
+	var monthCode = 201406;
+	var firstMonth = calendar.months[ monthCode ];
+	var todayCode = 20140609;
+
+	describe( 'constructor', function () {
+
+		it( 'has date `date` property', function () {
+			expect( firstMonth.days[nToday - 1].getInfo().date.toDateString() ).to.equal( today.toDateString() );
+		});
+
+		it( 'has `year` property in format YYYY', function () {
+			expect( firstMonth.days[0].getInfo().year ).to.equal( monthCode.toString().slice( 0, 4 ));
+		});
+
+		it( 'has `month` property in format MM', function () {
+			expect( firstMonth.days[0].getInfo().month ).to.equal( monthCode.toString().slice( 4, 6 ));
+		});
+
+		it( 'has boolean `checked` property', function () {
+			expect( firstMonth.days[nToday].isChecked() ).to.equal( false );
+		});
+
+		it( 'has boolean `blocked` property', function () {
+			expect( firstMonth.days[0].isDisabled() ).to.equal( false );
+		});
+
+		it( 'print its element in month.el', function () {
+			expect( firstMonth.days[0].el ).to.exist;
+		});
+
+		it( 'has `el` property containing input element', function () {
+			expect( firstMonth.days[0].el.getElementsByTagName( 'input' ).length ).to.be.above( 0 );
+		});
+
+		it( 'has `el` property containing label element', function () {
+			expect( firstMonth.days[0].el.getElementsByTagName( 'label' ).length ).to.be.above( 0 );
+		});
+
+		it( 'has `code` property in format "YYYYMMDD"', function () {
+			expect( firstMonth.days[nToday - 1].getInfo().code ).to.equal( todayCode );
+		});
+
+		it( '`el` has data-almaday property and it equal its code', function () {
+			expect( firstMonth.days[ nToday - 1 ].el.getAttribute( 'data-almaday' )).to.equal( todayCode.toString() );
+		});
+	});
+
+	describe( '#check', function () {
+		it( 'change `checked` to `true` property in element and object', function () {
+			firstMonth.days[ nToday ].inp.checked = false;
+			firstMonth.days[ nToday ].check();
+			expect( firstMonth.days[ nToday ].inp.checked ).to.equal( true );
+			expect( firstMonth.days[ nToday ].isChecked() ).to.equal( true );
+		});
+	});
+
+	describe( '#uncheck', function () {
+		it( 'change `checked` property to `false` in element and object', function () {
+			firstMonth.days[ nToday ].inp.checked = true;
+			firstMonth.days[ nToday ].uncheck();
+			expect( firstMonth.days[ nToday ].inp.checked ).to.equal( false );
+			expect( firstMonth.days[ nToday ].isChecked() ).to.equal( false );
+		});
+	});
+
+	describe( '#onChange', function () {
+		it( 'binds change on checked state', function () {
+			//firstMonth.days[11].inp.click();
+			//expect( control ).to.equal( '20140612' );
+			firstMonth.days[14].check();
+			expect( control ).to.equal( 20140615 );
+		});
+	});
+});
+
+describe( 'show', function () {
+	describe( 'show', function () {
+		it( 'sets months to show in Almanac.revealed', function () {
+			var el = bulkElem();
+			var calendar = almanac.createCalendar( el );
+			var today = new Date();
+			var monthCode = getMonthCode( today );
+			expect( calendar.get( 'revealed' )[0].code ).to.equal( monthCode );
+		});
+	});
 
 	describe( 'reveal', function () {
 
@@ -348,178 +508,78 @@ describe( 'show', function () {
 });
 
 
-describe( 'Month', function () {
 
-	describe( 'constructor', function () {
+describe( 'Alamanac Header', function () {
 
-		var el = bulkElem();
-		var calendar = almanac.createCalendar( el );
-		var today = new Date();
-		var firstMonth;
-		var monthCode = getMonthCode( today );
+	var el = bulkElem();
+	var calendar = almanac.createCalendar( el );
+	var header = calendar.el.getElementsByTagName( 'header' )[0];
+	var left = header.getElementsByTagName( 'a' )[0];
+	var right = header.getElementsByTagName( 'a' )[1];
 
-		it( 'sets itself in Almanac.months', function () {
-			firstMonth = calendar.months[getMonthCode( today )];
-			expect( firstMonth ).to.exist;
-		});
-
-		it( 'has `year` property in format "YYYY"', function () {
-			expect( firstMonth.data.year ).to.equal( monthCode.slice( 0, 4 ));
-		});
-
-		it( 'has `month` property in format "MM"', function () {
-			expect( firstMonth.data.month ).to.equal( monthCode.slice( 4, 6 ));
-		});
-
-		it( 'has `el` property containing HTML month element', function () {
-			expect( firstMonth.el ).to.exist;
-		});
-
-		it( 'has `days` array ', function () {
-			expect( firstMonth.days ).to.exist;
-			expect( isArray( calendar.months[getMonthCode( today )].days )).to.equal( true );
-		});
-
-		it( 'has `visible` property', function () {
-			expect( firstMonth.visible ).to.exist;
-		});
-
-		it( '`el` has data-almaMonth property and it is correct', function () {
-			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.exist;
-			expect( firstMonth.el.getAttribute( 'data-almaMonth' )).to.equal( monthCode );
-		});
-
-
-		it( 'starts with the correct day of the week', function (){
-			var elem = bulkElem();
-			var alma = almanac.createCalendar( elem, {firstMonth: new Date( 2014, 5, 1 )});
-			var dia = alma.months[ monthCode ].days[0];
-			expect( dia.data.weekDay ).to.equal( 0 );
-		});
-
-		it( 'print days in calendar', function () {
-			expect( firstMonth.el.getElementsByTagName( 'div' ).length ).to.be.above( 27 );
-		});
-
-		it( 'has the correct number of days', function () {
-			var daysInMonth = new Date( Number(monthCode.slice(2,4)), Number(monthCode.slice(4, 6) ) , 0 ).getDate();
-			expect( firstMonth.days.length ).to.equal( daysInMonth );
-		});
+	it( 'append prev and next buttons', function () {
+		expect( left ).to.exist;
+		expect( right ).to.exist;
 	});
 
-	describe( '#show', function () {
-		var el = bulkElem();
-		var calendar = almanac.createCalendar( el );
-		var today = new Date();
-		var firstMonth;
-		var monthCode = getMonthCode( today );
-		calendar.months[ monthCode ].visible = false;
-		it( 'sets true `visible` property', function () {
-			calendar.months[ monthCode ].show();
-			expect( calendar.months[ monthCode ].visible ).to.equal( true );
-		});
-		it( 'show the month element', function () {
-			expect( hasClass( calendar.months[ monthCode ].el, 'hidden' )).to.equal( false );
-		});
-	});
-
-	describe( '#hide', function () {
-		var el = bulkElem();
-		var calendar = almanac.createCalendar( el );
-		var today = new Date();
-		var firstMonth;
-		var monthCode = getMonthCode( today );
-		calendar.months[ monthCode ].visible = true;
-		addClass( calendar.months[ monthCode ].el, 'hidden' );
-		it( 'change `visible` property', function () {
-			calendar.months[ monthCode ].hide();
-			expect( calendar.months[ monthCode ].visible ).to.equal( false );
-		});
-		it( 'hide the month element', function () {
-			expect( hasClass( calendar.months[ monthCode ].el, 'hidden' )).to.equal( true );
-		});
+	it( 'buttons move the cursor', function () {
+		right.click();
+		expect( calendar.get( 'cursor' )).to.equal( 1 );
+		left.click();
+		expect( calendar.get( 'cursor' )).to.equal( 0 );
 	});
 });
 
-describe( 'Day', function () {
 
-	var el = bulkElem();
-	var calendar = almanac.createCalendar( document.getElementById( 'rendered' ));
-	var today = new Date(2014, 5, 9);
-	var nToday = 9;
-	var monthCode = '201406';
-	var firstMonth = calendar.months[ monthCode ];
-	var todayCode = '20140609';
-
-	describe( 'constructor', function () {
-
-		it( 'has date `date` property', function () {
-			expect( firstMonth.days[nToday -1 ].data.date.toDateString() ).to.equal( today.toDateString() );
+describe( 'fullDayData', function () {
+	it( 'disable days if exceeds the bounds start-end', function () {
+		var el = bulkElem();
+		var calendar = almanac.createCalendar( el, {
+			start: 20140602,
+			end: 20140610,
+			firstMonth: 201406
 		});
-
-		it( 'has `year` property in format "YYYY"', function () {
-			expect( firstMonth.days[0].data.year ).to.equal( monthCode.slice( 0, 4 ));
-		});
-
-		it( 'has `month` property in format "MM"', function () {
-			expect( firstMonth.days[0].data.month ).to.equal( monthCode.slice( 4, 6 ));
-		});
-
-		it( 'has boolean `checked` property', function () {
-			expect( typeof firstMonth.days[nToday].checked ).to.equal( 'boolean' );
-		});
-
-		it( 'has boolean `blocked` property', function () {
-			expect( typeof firstMonth.days[0].blocked ).to.equal( 'boolean' );
-		});
-
-		it( 'print its element in month.el', function () {
-			expect( firstMonth.days[0].el ).to.exist;
-		});
-
-		it( 'has `el` property containing input element', function () {
-			expect( firstMonth.days[0].el.getElementsByTagName( 'input' ).length ).to.be.above( 0 );
-		});
-
-		it( 'has `el` property containing label element', function () {
-			expect( firstMonth.days[0].el.getElementsByTagName( 'label' ).length ).to.be.above( 0 );
-		});
-
-		it( 'has `code` property in format "YYYYMMDD"', function () {
-			expect( firstMonth.days[nToday - 1].data.code ).to.equal( todayCode );
-		});
-
-		it( '`el` has data-almaday property and it equal its code', function () {
-			expect( firstMonth.days[nToday - 1].el.getAttribute( 'data-almaday' )).to.equal( todayCode );
-		});
+		expect( calendar.days[ 20140601 ].isDisabled() ).to.equal( true );
 	});
-
-	describe( '#check', function () {
-		it( 'change `checked` to `true` property in element and object', function () {
-			firstMonth.days[nToday].inp.checked = false;
-			firstMonth.days[nToday].checked = false;
-			firstMonth.days[nToday].check();
-			expect( firstMonth.days[nToday].inp.checked).to.equal( true );
-			//expect( firstMonth.days[nToday].checked).to.equal( true );
+	it( 'disable days if match properties', function () {
+		var el = bulkElem();
+		var calendar = almanac.createCalendar( el, {
+			disable : [
+				{
+					matchProp: {
+						weekDay: 2
+					}
+				}
+			],
+			firstMonth: 201406
 		});
+		console.log( calendar.days );
+		expect( calendar.days[ 20140603 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140610 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140617 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140604 ].isDisabled() ).to.equal( false );
+		expect( calendar.days[ 20140611 ].isDisabled() ).to.equal( false );
+		expect( calendar.days[ 20140618 ].isDisabled() ).to.equal( false );
 	});
-
-	describe( '#uncheck', function () {
-		it( 'change `checked` property to `false` in element and object', function () {
-			firstMonth.days[nToday].inp.checked = true;
-			firstMonth.days[nToday].checked = true;
-			firstMonth.days[nToday].uncheck();
-			expect( firstMonth.days[nToday].inp.checked ).to.equal( false );
-			expect( firstMonth.days[nToday].checked ).to.equal( false );
+	it( 'disable days is in exceeds disable-limits', function () {
+		// var el = bulkElem();
+		var calendar = almanac.createCalendar( document.getElementById( 'rendered' ), {
+			disable : [
+				{
+					limit: {
+						min: 20140610,
+						max: 20140620
+					}
+				}
+			],
+			firstMonth: 201406
 		});
-	});
-
-	describe( '#onChange', function () {
-		it( 'binds change on checked state', function () {
-			firstMonth.days[11].inp.checked = false;
-			//firstMonth.days[11].inp.click();
-			firstMonth.days[11].check();
-			expect( firstMonth.days[11].checked ).to.equal( true );
-		});
+		console.log( calendar.days );
+		expect( calendar.days[ 20140603 ].isDisabled() ).to.equal( false );
+		expect( calendar.days[ 20140610 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140611 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140617 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140618 ].isDisabled() ).to.equal( true );
+		expect( calendar.days[ 20140622 ].isDisabled() ).to.equal( false );
 	});
 });

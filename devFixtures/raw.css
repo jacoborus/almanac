@@ -72,3 +72,7 @@
 	background-color: #333;
 	color: #fff;
 }
+[data-almanac] [data-almaday] input[type=checkbox]:disabled + label, [data-almanac] [data-almaday] input[type=radio]:disabled + label {
+	background-color: #aaa;
+	color: #fff;
+}

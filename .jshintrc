@@ -25,6 +25,7 @@
 		"document": false,
 		"Node": false,
 		"HTMLElement": false,
-		"window": false
+		"window": false,
+		"almanac": false
 	}
 }
