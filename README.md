@@ -21,30 +21,45 @@ or require it with [Browserify](http://browserify.org/):
 var Almanac = require('path/to/almanac')
 ```
 
+almanac.createCalendar( target, options )
+-----------------------------------------
 
-## Example
+Create an almanac in/at `target` with passed options.
 
-### HTML
+**Parameters:**
 
-```html
-<div id="myAlmanac"></div>
-```
+- **target** *HTML element*: Element to replace, or embed in the almanac
+- **options** *Object*
 
-### JS
 
+Example:
 ```js
 // get a HTML element
-var elem = document.getElementById( 'myAlmanac' );
+var elem = document.getElementById( 'myCalendar' );
 
 // or create one and insert when you want
 // var elem = document.createElement( 'div' );
+// elem.setAttribute( 'name', 'myCalendarName')
 
 // then create a calendar
-var cal = new Almanac( elem, {
-	multi: true,
-	showMonths: 2
+var calendar = almanac.createCalendar( elem, {
+multi: true,
+showMonths: 2
 });
 ```
+
+#### `options`:
+
+- **`name`**: Sets `name` as input name
+- **`multi`**: Sets single (input[type="radio"]) or multiple (input[type="checkbox"]) day selection.
+- **`showMonths`**: Months to show in calendar at once
+- **`id`**: Set `id` as almanac element id
+- **`classes`**: Add `classes` to almanac element. Separated by spaces
+- **`monthNames`**: List of month names. English names by default
+- **`firstDay`**: A day from first month to show in almanac
+- **`title`**: title for header calendar
+- **`noHeader`**: Don't show almanac header
+- **`binding`**: function to launch when day is clicked. Signature: checked (bool), day data (object)
 
 ## Tests
 
