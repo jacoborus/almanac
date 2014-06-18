@@ -415,7 +415,7 @@ createOpts = function (target, options) {
 createCalendar = function (target, options) {
 
 	// almanac options
-	var opts, show, cal, Month, Day, Header, MonthHeader, createDay, createMonth, Calendar;
+	var opts, show, cal, Month, Day, Header, createDay, createMonth, Calendar;
 
 	opts = createOpts(target, options);
 
@@ -468,7 +468,7 @@ createCalendar = function (target, options) {
 	 * @private
 	 */
 
-	Header = function () {
+	Header = function (title) {
 
 		var el, left, right;
 
@@ -485,30 +485,9 @@ createCalendar = function (target, options) {
 			cal.next();
 		};
 		el = document.createElement( 'header' );
-		el.appendChild( left );
-		el.appendChild( right );
-		this.el = el;
-	};
-
-
-	MonthHeader = function (mData) {
-
-		var el, left, right;
-
-		left  = this.left = document.createElement( 'a' );
-		right = this.right = document.createElement( 'a' );
-		left.innerHTML = '&lt;';
-		right.innerHTML = '&gt;';
-		left.setAttribute( 'class', 'floatleft');
-		right.setAttribute( 'class', 'floatright');
-		left.onclick = function () {
-			cal.prev();
-		};
-		right.onclick = function () {
-			cal.next();
-		};
-		el = document.createElement( 'header' );
-		el.innerHTML = opts.monthNames[ Number(mData.month) - 1 ] + ' ' + mData.year.slice( 2, 4 );
+		if (title) {
+			el.innerHTML = title;
+		}
 		el.appendChild( left );
 		el.appendChild( right );
 		this.el = el;
@@ -626,10 +605,19 @@ createCalendar = function (target, options) {
 	};
 
 
-
+	/*
+		d:
+		- el: html element
+		- year: Number year
+		- month: number month
+		- code: YYYYMM
+		- visible: boolean
+		- days: Array with its days
+		- n: Number total days in month
+	 */
 	createMonth = function (d) {
 
-		var dDays = {};
+		var dDays = {}, monthTitle;
 
 		Month = function (d) {
 
@@ -651,11 +639,12 @@ createCalendar = function (target, options) {
 			el.setAttribute( 'data-almamonth', d.code );
 
 			// insert header with month name
+			monthTitle = opts.monthNames[ Number(d.month) - 1 ] + ' ' + d.year.slice( 2, 4 );
 			if (!opts.noMonthHeader) {
-				el.appendChild( new MonthHeader(d) );
+				el.appendChild( new Header( monthTitle ).el );
 			} else {
 				this.header = document.createElement( 'header' );
-				this.header.innerHTML = opts.monthNames[ Number(d.month) - 1 ] + ' ' + d.year.slice( 2, 4 );
+				this.header.innerHTML = monthTitle;
 				this.el.appendChild( this.header );
 			}
 
@@ -679,7 +668,7 @@ createCalendar = function (target, options) {
 
 		Month.prototype.hide = function () {
 			this.visible = false;
-			addClass( this.el, 'hidden');
+			addClass( this.el, 'hidden' );
 		};
 
 		Month.prototype.isVisible = function () {
@@ -697,13 +686,13 @@ createCalendar = function (target, options) {
 	 * Example:
 	 * ```js
 	 * // get a HTML element
-	 * var elem = document.getElementById( 'almanac' );
+	 * var elem = document.getElementById( 'myCalendar' );
 	 *
 	 * // or create one and insert when you want
 	 * // var elem = document.createElement( 'div' );
 	 *
 	 * // then create a calendar
-	 * var cal = new Almanac( elem, {
+	 * var calendar = almanac.createCalendar( elem, {
 	 * 	multi: true,
 	 * 	showMonths: 2
 	 * });
@@ -718,7 +707,9 @@ createCalendar = function (target, options) {
 	 * - **`classes`**: Add `classes` to almanac element. Separated by spaces
 	 * - **`monthNames`**: List of month names. English names by default
 	 * - **`firstDay`**: A day from first month to show in almanac
+	 * - **`title`**: title for header calendar
 	 * - **`noHeader`**: Don't show almanac header
+	 * - **`binding`**: function to launch when day is clicked. Signature: checked (bool), day data (object)
 	 *
 	 * @param {HTML element} target  Element to replace, or embed in the almanac
 	 * @param {Object} options
@@ -747,11 +738,11 @@ createCalendar = function (target, options) {
 
 		// add header
 		if (!opts.noHeader) {
-			opts.header = new Header( this );
+			opts.header = new Header( opts.title );
 			target.appendChild( opts.header.el );
 		}
 
-		show.call( this, opts );
+		show.call( this );
 	};
 
 	Calendar.prototype.next = function () {
@@ -786,9 +777,8 @@ almanac.clean = function () {
 	// empty almanac selection/s
 };
 
-/*!
- * Expose module
- */
+/* Expose module */
+
 // node.js / browserify / component
 if ((typeof module !== 'undefined') && (typeof module.exports !== 'undefined')) {
 	module.exports = almanac;
