@@ -8,19 +8,17 @@
 [data-almanac] header{
 	width: 98%;
 }
-[data-almanac] a.floatleft {
-	float: left;
+[data-almanac] a.alma-bt {
 	background: #333;
 	color: #fff;
 	padding: .4em;
 	cursor: pointer;
 }
-[data-almanac] a.floatright {
+[data-almanac] a.left-bt {
+	float: left;
+}
+[data-almanac] a.right-bt {
 	float: right;
-	background: #333;
-	color: #fff;
-	padding: .4em;
-	cursor: pointer;
 }
 [data-almanac], [data-almanac] header, [data-almanac] [data-almamonth], [data-almanac] label{
 	float: left;
@@ -50,6 +48,10 @@
 }
 [data-almanac] [data-almamonth] header {
 	height: 12.28%;
+}
+[data-almanac] [data-almamonth] header a.alma-bt{
+	height: 100%;
+	line-height: 1.6em;
 }
 [data-almanac] [data-almaday] {
 	float: left;

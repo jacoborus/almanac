@@ -60,6 +60,8 @@ showMonths: 2
 - **`title`**: title for header calendar
 - **`noHeader`**: Don't show almanac header
 - **`binding`**: function to launch when day is clicked. Signature: checked (bool), day data (object)
+- **`start`**: first enabled day (format: YYYYMMDD)
+- **`end`**: last enabled day (format: YYYYMMDD)
 
 ## Tests
 

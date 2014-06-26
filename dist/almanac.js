@@ -198,7 +198,7 @@ checkClassNames = function (classes) {
 // inject css in html header
 addCSS = function () {
 	var s = document.getElementById('almanac-style'),
-		CSSs = '[data-almanac]{padding:.5%}[data-almanac] *{text-align:center;box-sizing:border-box}[data-almanac] header{width:98%}[data-almanac] a.floatleft{float:left;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac] a.floatright{float:right;background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac],[data-almanac] [data-almamonth],[data-almanac] header,[data-almanac] label{float:left;border:1px solid #aaa;border-radius:.3em;background-color:#fff;color:#333;line-height:2.5em}[data-almanac] [data-almaday],[data-almanac] [data-almamonth] header{height:12.28%;margin:1%}[data-almanac] [data-almamonth]{width:21em;height:21em;padding:.5em;margin:.5em;overflow:hidden}[data-almanac] [data-almamonth].hidden{width:0;margin:0;padding:0;height:0;border:0}[data-almanac] [data-almamonth] header{height:12.28%}[data-almanac] [data-almaday]{float:left;width:12.28%}[data-almanac] [data-almaday] input{display:none}[data-almanac] [data-almaday] label{width:100%;height:100%;cursor:pointer;transition:all .3s}[data-almanac] [data-almaday]:hover label{background:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:checked+label,[data-almanac] [data-almaday] input[type=radio]:checked+label{background-color:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:disabled+label,[data-almanac] [data-almaday] input[type=radio]:disabled+label{background-color:#aaa;color:#fff}';
+		CSSs = '[data-almanac]{padding:.5%}[data-almanac] *{text-align:center;box-sizing:border-box}[data-almanac] header{width:98%}[data-almanac] a.alma-bt{background:#333;color:#fff;padding:.4em;cursor:pointer}[data-almanac] a.left-bt{float:left}[data-almanac] a.right-bt{float:right}[data-almanac],[data-almanac] [data-almamonth],[data-almanac] header,[data-almanac] label{float:left;border:1px solid #aaa;border-radius:.3em;background-color:#fff;color:#333;line-height:2.5em}[data-almanac] [data-almaday],[data-almanac] [data-almamonth] header{height:12.28%;margin:1%}[data-almanac] [data-almamonth]{width:21em;height:21em;padding:.5em;margin:.5em;overflow:hidden}[data-almanac] [data-almamonth].hidden{width:0;margin:0;padding:0;height:0;border:0}[data-almanac] [data-almamonth] header{height:12.28%}[data-almanac] [data-almamonth] header a.alma-bt{height:100%;line-height:1.6em}[data-almanac] [data-almaday]{float:left;width:12.28%}[data-almanac] [data-almaday] input{display:none}[data-almanac] [data-almaday] label{width:100%;height:100%;cursor:pointer;transition:all .3s}[data-almanac] [data-almaday]:hover label{background:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:checked+label,[data-almanac] [data-almaday] input[type=radio]:checked+label{background-color:#333;color:#fff}[data-almanac] [data-almaday] input[type=checkbox]:disabled+label,[data-almanac] [data-almaday] input[type=radio]:disabled+label{background-color:#aaa;color:#fff}';
 
 	if (s === null) {
 		s = document.createElement( 'style' );
@@ -282,8 +282,13 @@ validMonthNames = function (l) {
 
 // Render indentation for first month day
 renderIndent = function ( n ) {
+	var indent = document.createElement( 'div' );
 	n = (n === 0) ? 6 * 14.28 : (n-1) * 14.28;
-	return '<div style="float:left;width:' + n + '%;text-indent:-999999px;">.</div>';
+	indent.style.float = 'left';
+	indent.style.textIndent = '-999999px';
+	indent.style.width = n + '%';
+	indent.innerHTML = '.';
+	return indent;
 };
 
 // addEventListener for all
@@ -476,20 +481,20 @@ createCalendar = function (target, options) {
 		right = this.right = document.createElement( 'a' );
 		left.innerHTML = '&lt;';
 		right.innerHTML = '&gt;';
-		left.setAttribute( 'class', 'floatleft' );
-		right.setAttribute( 'class', 'floatright' );
-		left.onclick = function () {
-			cal.prev();
-		};
-		right.onclick = function () {
-			cal.next();
-		};
+		addClasses( left, 'left-bt alma-bt');
+		addClasses( right, 'right-bt alma-bt');
 		el = document.createElement( 'header' );
 		if (title) {
 			el.innerHTML = title;
 		}
 		el.appendChild( left );
 		el.appendChild( right );
+		left.onclick = function () {
+			cal.prev();
+		};
+		right.onclick = function () {
+			cal.next();
+		};
 		this.el = el;
 	};
 
@@ -649,7 +654,7 @@ createCalendar = function (target, options) {
 			}
 
 			// insert blank space before first month day
-			el.innerHTML += renderIndent( new Date( d.year, d.month - 1, 1 ).getDay());
+			el.appendChild( renderIndent( new Date( d.year, d.month - 1, 1 ).getDay()));
 
 			// generate days
 			while (i < d.n) {

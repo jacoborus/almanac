@@ -282,8 +282,13 @@ validMonthNames = function (l) {
 
 // Render indentation for first month day
 renderIndent = function ( n ) {
+	var indent = document.createElement( 'div' );
 	n = (n === 0) ? 6 * 14.28 : (n-1) * 14.28;
-	return '<div style="float:left;width:' + n + '%;text-indent:-999999px;">.</div>';
+	indent.style.float = 'left';
+	indent.style.textIndent = '-999999px';
+	indent.style.width = n + '%';
+	indent.innerHTML = '.';
+	return indent;
 };
 
 // addEventListener for all
@@ -476,20 +481,20 @@ createCalendar = function (target, options) {
 		right = this.right = document.createElement( 'a' );
 		left.innerHTML = '&lt;';
 		right.innerHTML = '&gt;';
-		left.setAttribute( 'class', 'floatleft' );
-		right.setAttribute( 'class', 'floatright' );
-		left.onclick = function () {
-			cal.prev();
-		};
-		right.onclick = function () {
-			cal.next();
-		};
+		addClasses( left, 'left-bt alma-bt');
+		addClasses( right, 'right-bt alma-bt');
 		el = document.createElement( 'header' );
 		if (title) {
 			el.innerHTML = title;
 		}
 		el.appendChild( left );
 		el.appendChild( right );
+		left.onclick = function () {
+			cal.prev();
+		};
+		right.onclick = function () {
+			cal.next();
+		};
 		this.el = el;
 	};
 
@@ -649,7 +654,7 @@ createCalendar = function (target, options) {
 			}
 
 			// insert blank space before first month day
-			el.innerHTML += renderIndent( new Date( d.year, d.month - 1, 1 ).getDay());
+			el.appendChild( renderIndent( new Date( d.year, d.month - 1, 1 ).getDay()));
 
 			// generate days
 			while (i < d.n) {
@@ -710,6 +715,8 @@ createCalendar = function (target, options) {
 	 * - **`title`**: title for header calendar
 	 * - **`noHeader`**: Don't show almanac header
 	 * - **`binding`**: function to launch when day is clicked. Signature: checked (bool), day data (object)
+	 * - **`start`**: first enabled day (format: YYYYMMDD)
+	 * - **`end`**: last enabled day (format: YYYYMMDD)
 	 *
 	 * @param {HTML element} target  Element to replace, or embed in the almanac
 	 * @param {Object} options
