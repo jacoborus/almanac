@@ -1,6 +1,6 @@
 {
   "name": "almanac",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "HTML5 calendar element. Not ready for production.",
   "main": "index.js",
   "scripts": {
@@ -32,12 +32,12 @@
   "devDependencies": {
     "chai": "^1.9.1",
     "gulp": "^3.6.2",
-    "gulp-clean": "^0.2.4",
+    "gulp-clean": "^0.3.1",
     "gulp-cssmin": "^0.1.4",
     "gulp-hogan": "0.0.1",
     "gulp-jshint": "^1.5.5",
     "gulp-rename": "^1.2.0",
-    "gulp-uglify": "^0.2.1",
+    "gulp-uglify": "^0.3.1",
     "jshint-stylish": "^0.2.0",
     "mocha": "^1.18.2"
   }
